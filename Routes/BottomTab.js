@@ -1,6 +1,9 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { TouchableOpacity, View } from "react-native";
+import { useDispatch } from "react-redux";
+
+import { authSignOutUser } from "../redux/auth/authOperations";
 
 import { PostsScreen } from "../Screens/PostsScreen";
 import { CreatePostsScreen } from "../Screens/CreatePostsScreen";
@@ -14,7 +17,8 @@ import Logout from "../assets/images/logout.svg";
 
 const BottomTab = createBottomTabNavigator();
 
-export const BottomTabMenu = ({navigation}) => {
+export const BottomTabMenu = ({ navigation }) => {
+  const dispatch = useDispatch();
   return (
     <BottomTab.Navigator
       screenOptions={{
@@ -65,7 +69,7 @@ export const BottomTabMenu = ({navigation}) => {
             </View>
           ),
           headerRight: ({ focused, size, color }) => (
-            <TouchableOpacity >
+            <TouchableOpacity onPress={() => dispatch(authSignOutUser())}>
               <Logout size={size} color={color} />
             </TouchableOpacity>
           ),

@@ -3,7 +3,17 @@ import { Camera } from "expo-camera";
 import { shareAsync } from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
-import { StyleSheet, Image, Text, View, TouchableOpacity, Alert } from "react-native";
+import {
+  StyleSheet,
+  Image,
+  Text,
+  View,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import uuid from "react-native-uuid";
+
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 
 import DownloadPhoto from "../assets/images/downloadPhoto.svg";
 
@@ -15,29 +25,51 @@ export const CameraScreen = ({ navigation }) => {
   const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState();
   const [photo, setPhoto] = useState();
 
+  const uploadPhotoToServer = async () => {
+    try {
+      const response = await fetch(photo);
+      const uniquePostId = uuid.v4();
+      const storage = getStorage();
+      const storageRef = ref(storage, `postImage/${uniquePostId}`);
+      await uploadBytes(storageRef, response.blob());
+    } catch (error) {
+      console.log("error-message.upoload-photo", error.message);
+    }
+  };
+
   useEffect(() => {
     (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission to access location was denied");
-      }
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("Permission to access location was denied");
+        }
 
-      const location = await Location.getCurrentPositionAsync({});
-      const coords = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      };
-      setLocation(coords);
+        const location = await Location.getCurrentPositionAsync({});
+        const coords = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
+        setLocation(coords);
+      } catch (error) {
+        console.log("error-message", error.message);
+      }
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
-      const cameraPermission = await Camera.requestCameraPermissionsAsync();
-      const mediaLibraryPermission =
-        await MediaLibrary.requestPermissionsAsync();
-      setHasCameraPermission(cameraPermission.status === "granted");
-      setHasMediaLibraryPermission(mediaLibraryPermission.status === "granted");
+      try {
+        const cameraPermission = await Camera.requestCameraPermissionsAsync();
+        const mediaLibraryPermission =
+          await MediaLibrary.requestPermissionsAsync();
+        setHasCameraPermission(cameraPermission.status === "granted");
+        setHasMediaLibraryPermission(
+          mediaLibraryPermission.status === "granted"
+        );
+      } catch (error) {
+        console.log("error-message", error.message);
+      }
     })();
   }, []);
 
@@ -50,8 +82,12 @@ export const CameraScreen = ({ navigation }) => {
   }
 
   const takePic = async () => {
-    const newPhoto = await cameraRef.current.takePictureAsync();
-    setPhoto(newPhoto.uri);
+    try {
+      const newPhoto = await cameraRef.current.takePictureAsync();
+      setPhoto(newPhoto.uri);
+    } catch (error) {
+      console.log("error-message-take-pic", error.message);
+    }
   };
 
   if (photo) {
@@ -66,9 +102,13 @@ export const CameraScreen = ({ navigation }) => {
       //   MediaLibrary.saveToLibraryAsync(photo.uri).then(() => {
       //     setPhoto(undefined);
       //   });
+      uploadPhotoToServer();
       navigation.navigate("Create Post", { photo, location });
-      setTimeout(() => {setPhoto(undefined); setLocation(null)}, 400);
-        };
+      setTimeout(() => {
+        setPhoto(undefined);
+        setLocation(null);
+      }, 400);
+    };
 
     return (
       <View style={styles.container}>

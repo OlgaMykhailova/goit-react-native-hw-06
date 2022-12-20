@@ -16,9 +16,13 @@ import {
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
+import { useDispatch } from "react-redux";
+
 import Add from "../assets/images/add.svg";
 
-export const RegistrationScreen = ({navigation}) => {
+import { authSignUpUser } from "../redux/auth/authOperations";
+
+export const RegistrationScreen = ({ navigation }) => {
   const [fontsLoaded] = useFonts({
     Roboto: require("../assets/fonts/Roboto-Regular.ttf"),
     RobotoMedium: require("../assets/fonts/Roboto-Medium.ttf"),
@@ -42,6 +46,8 @@ export const RegistrationScreen = ({navigation}) => {
 
   const [isPasswordHidden, setIsPasswordHidden] = useState(true);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     const onChange = () => {
       const width = Dimensions.get("window").width;
@@ -58,13 +64,18 @@ export const RegistrationScreen = ({navigation}) => {
   const emailHandler = (email) => setEmail(email);
   const passwordHandler = (password) => setPassword(password);
 
-  const onLogin = () => {
+  const onSignup = () => {
     if (!login.trim() || !email.trim() || !password.trim()) {
       Alert.alert(`All fields must be completed!`);
       return;
     }
     Alert.alert(`Welcome ${login}, your registration is successfull!`);
-    console.log(login, email, password);
+    const newUser = {
+      login,
+      email,
+      password,
+    }
+    dispatch(authSignUpUser(newUser));
     setLogin("");
     setEmail("");
     setPassword("");
@@ -145,7 +156,7 @@ export const RegistrationScreen = ({navigation}) => {
                     onBlur={() => setIsFocusedLogin(false)}
                     value={login}
                     placeholder="Login"
-                    textContentType={'emailAddress'}
+                    textContentType={"emailAddress"}
                     cursorColor={"#BDBDBD"}
                     placeholderTextColor={"#BDBDBD"}
                     onChangeText={loginHandler}
@@ -160,7 +171,7 @@ export const RegistrationScreen = ({navigation}) => {
                     onBlur={() => setIsFocusedEmail(false)}
                     value={email}
                     placeholder="Email"
-                    textContentType={'emailAddress'}
+                    textContentType={"emailAddress"}
                     cursorColor={"#BDBDBD"}
                     placeholderTextColor={"#BDBDBD"}
                     onChangeText={emailHandler}
@@ -175,7 +186,7 @@ export const RegistrationScreen = ({navigation}) => {
                     onFocus={() => setIsFocusedPassword(true)}
                     onBlur={() => setIsFocusedPassword(false)}
                     value={password}
-                    textContentType={'password'}
+                    textContentType={"password"}
                     placeholder="Password"
                     cursorColor={"#BDBDBD"}
                     placeholderTextColor={"#BDBDBD"}
@@ -197,14 +208,16 @@ export const RegistrationScreen = ({navigation}) => {
                       {isPasswordHidden ? "Show" : "Hide"}
                     </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.button} onPress={onLogin}>
+                  <TouchableOpacity style={styles.button} onPress={onSignup}>
                     <Text
                       style={{ ...styles.textButton, fontFamily: "Roboto" }}
                     >
                       Sign Up
                     </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("Login")}
+                  >
                     <Text style={{ ...styles.link, fontFamily: "Roboto" }}>
                       Have already an account? Sign in
                     </Text>
