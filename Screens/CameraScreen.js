@@ -33,11 +33,7 @@ export const CameraScreen = ({ navigation }) => {
         }
 
         const location = await Location.getCurrentPositionAsync({});
-        const coords = {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        };
-        setLocation(coords);
+        setLocation(location.coords);
       } catch (error) {
         console.log("error-message", error.message);
       }

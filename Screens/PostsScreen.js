@@ -10,36 +10,13 @@ import {
   Dimensions,
   FlatList,
 } from "react-native";
+
+import { collection, query, onSnapshot } from "firebase/firestore";
+import { firestore } from "../firebase/config";
+
 import Message from "../assets/images/message.svg";
 import Like from "../assets/images/like.svg";
 import Location from "../assets/images/location.svg";
-
-const POSTS = [
-  {
-    id: 1,
-    postImage: require("../assets/images/forrest.jpg"),
-    title: "Forrest",
-    location: "Ukraine",
-    comments: 8,
-    likes: 153,
-  },
-  {
-    id: 2,
-    postImage: require("../assets/images/sunset.jpg"),
-    title: "Sunset on the Black Sea",
-    location: "Ukraine",
-    comments: 3,
-    likes: 200,
-  },
-  {
-    id: 3,
-    postImage: require("../assets/images/oldhouse.jpg"),
-    title: "Old house in Venice",
-    location: "Italy",
-    comments: 50,
-    likes: 200,
-  },
-];
 
 export const PostsScreen = ({ route, navigation }) => {
   const [fontsLoaded] = useFonts({
@@ -52,9 +29,18 @@ export const PostsScreen = ({ route, navigation }) => {
     Dimensions.get("window").width
   );
 
-  
-  const [posts, setPosts] = useState(POSTS);
+  const [posts, setPosts] = useState([]);
 
+  const getAllPosts = async () => {
+    try {
+      const ref = query(collection(firestore, "posts"));
+      onSnapshot(ref, (snapshot) => {
+        setPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      });
+    } catch (error) {
+      console.log("error-message.get-posts", error.message);
+    }
+  };
 
   useEffect(() => {
     const onChange = () => {
@@ -64,6 +50,10 @@ export const PostsScreen = ({ route, navigation }) => {
     const dimensionsHandler = Dimensions.addEventListener("change", onChange);
 
     return () => dimensionsHandler.remove();
+  }, []);
+
+  useEffect(() => {
+    getAllPosts();
   }, []);
 
   useEffect(() => {
@@ -89,7 +79,7 @@ export const PostsScreen = ({ route, navigation }) => {
     >
       <FlatList
         ListHeaderComponent={
-          <View style={styles.userSection}>
+          <View style={{ ...styles.userSection, width: windowWidth - 16 * 2 }}>
             <Image
               style={styles.avatarImage}
               source={require("../assets/images/userAvatar.jpg")}
@@ -107,15 +97,20 @@ export const PostsScreen = ({ route, navigation }) => {
           </View>
         }
         data={posts}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={{ ...styles.cardContainer }}>
-            <Image
-              source={item.postImage}
-              style={{
-                ...styles.cardImage,
-                width: windowWidth - 16 * 2,
-              }}
-            />
+          <View
+            style={{ ...styles.cardContainer, width: windowWidth - 16 * 2 }}
+          >
+            <View style={{ alignItems: "center" }}>
+              <Image
+                source={{ uri: item.photo }}
+                style={{
+                  ...styles.cardImage,
+                  width: windowWidth - 16 * 2,
+                }}
+              />
+            </View>
             <Text style={{ ...styles.cardTitle, fontFamily: "RobotoMedium" }}>
               {item.title}
             </Text>
@@ -138,14 +133,16 @@ export const PostsScreen = ({ route, navigation }) => {
                   <Text style={styles.cardText}>{item.likes}</Text>
                 </View>
               </View>
-              <TouchableOpacity style={styles.wrapper} onPress={() => navigation.navigate('Map')}>
+              <TouchableOpacity
+                style={styles.wrapper}
+                onPress={() => navigation.navigate("Map")}
+              >
                 <Location />
-                <Text style={styles.cardText}>{item.location}</Text>
+                <Text style={styles.cardText}>location</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
-        keyExtractor={(item) => item.id}
         contentContainerStyle={{
           flexGrow: 1,
         }}
@@ -156,12 +153,10 @@ export const PostsScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  
   userSection: {
     marginVertical: 32,
-    flexDirection: "row",
+    flexDirec     tion: "row",
     alignItems: "center",
-    width: "100%",
   },
   avatarImage: {
     width: 60,
@@ -190,6 +185,7 @@ const styles = StyleSheet.create({
   },
   cardContainer: {},
   cardImage: {
+    height: 240,
     resizeMode: "cover",
     borderRadius: 8,
   },

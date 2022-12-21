@@ -56,11 +56,12 @@ export const CreatePostsScreen = ({ route, navigation }) => {
     try {
       console.log(image)
       const response = await fetch(image);
+      const file = await response.blob();
       const uniquePostId = uuid.v4();
       const storage = getStorage();
       const storageRef = ref(storage, `postImage/${uniquePostId}`);
 
-      await uploadBytes(storageRef, response.blob());
+      await uploadBytes(storageRef, file);
 
       const photoRef = await getDownloadURL(storageRef);
       console.log('photoRef', photoRef);
@@ -81,7 +82,7 @@ export const CreatePostsScreen = ({ route, navigation }) => {
         login,
       });
     } catch (error) {
-      console.log('error-message.upoload-to-server', error.message)
+      console.log('error-message.upload-to-server', error.message)
     }
   }
 
@@ -91,20 +92,12 @@ export const CreatePostsScreen = ({ route, navigation }) => {
       return;
     }
     Alert.alert(`Post successfully created!`);
-    const newPost = {
-      id: Date(),
-      imagePost: image,
-      title: title,
-      location: `${location?.latitude}, ${location?.longitude}`,
-      comments: 50,
-      likes: 200,
-    };
     uploadPostToServer();
     setImage();
     setTitle("");
     setLocation("");
     Keyboard.dismiss();
-    navigation.navigate("Posts", { newPost });
+    navigation.navigate("Posts");
   };
 
   const onDelete = () => {
