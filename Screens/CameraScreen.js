@@ -11,31 +11,18 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import uuid from "react-native-uuid";
 
-import { getStorage, ref, uploadBytes } from "firebase/storage";
 
 import DownloadPhoto from "../assets/images/downloadPhoto.svg";
 
 export const CameraScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
+  const [photo, setPhoto] = useState();
 
   const cameraRef = useRef();
   const [hasCameraPermission, setHasCameraPermission] = useState();
   const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState();
-  const [photo, setPhoto] = useState();
-
-  const uploadPhotoToServer = async () => {
-    try {
-      const response = await fetch(photo);
-      const uniquePostId = uuid.v4();
-      const storage = getStorage();
-      const storageRef = ref(storage, `postImage/${uniquePostId}`);
-      await uploadBytes(storageRef, response.blob());
-    } catch (error) {
-      console.log("error-message.upoload-photo", error.message);
-    }
-  };
+  
 
   useEffect(() => {
     (async () => {
@@ -102,7 +89,6 @@ export const CameraScreen = ({ navigation }) => {
       //   MediaLibrary.saveToLibraryAsync(photo.uri).then(() => {
       //     setPhoto(undefined);
       //   });
-      uploadPhotoToServer();
       navigation.navigate("Create Post", { photo, location });
       setTimeout(() => {
         setPhoto(undefined);

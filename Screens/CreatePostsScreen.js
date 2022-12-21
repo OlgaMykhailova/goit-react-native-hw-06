@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useSelector } from "react-redux";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import {
@@ -14,6 +15,12 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
+
+import uuid from "react-native-uuid";
+
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc } from "firebase/firestore";
+import { firestore } from "../firebase/config";
 
 import DownloadPhoto from "../assets/images/downloadPhoto.svg";
 import Location from "../assets/images/location.svg";
@@ -40,8 +47,43 @@ export const CreatePostsScreen = ({ route, navigation }) => {
   const [isDisabledPublish, setIsDisabledPublish] = useState(true);
   const [isDisabledTrash, setIsDisabledTrash] = useState(true);
 
+  const {userId, login} = useSelector((state) => state.auth);
+
   const titleHandler = (title) => setTitle(title);
   // const locationHandler = (location) => setLocation(location);
+
+  const uploadPhotoToServer = async () => {
+    try {
+      console.log(image)
+      const response = await fetch(image);
+      const uniquePostId = uuid.v4();
+      const storage = getStorage();
+      const storageRef = ref(storage, `postImage/${uniquePostId}`);
+
+      await uploadBytes(storageRef, response.blob());
+
+      const photoRef = await getDownloadURL(storageRef);
+      console.log('photoRef', photoRef);
+      return photoRef;
+    } catch (error) {
+      console.log("error-message.upoload-photo", error.message);
+    }
+  };
+
+  const uploadPostToServer = async () => {
+    try {
+      const imageRef = await uploadPhotoToServer();
+      const postRef = await addDoc(collection(firestore, "posts"), {
+        photo: imageRef,
+        title,
+        location,
+        userId,
+        login,
+      });
+    } catch (error) {
+      console.log('error-message.upoload-to-server', error.message)
+    }
+  }
 
   const onPublish = () => {
     if (!title.trim() || !location) {
@@ -57,6 +99,7 @@ export const CreatePostsScreen = ({ route, navigation }) => {
       comments: 50,
       likes: 200,
     };
+    uploadPostToServer();
     setImage();
     setTitle("");
     setLocation("");
