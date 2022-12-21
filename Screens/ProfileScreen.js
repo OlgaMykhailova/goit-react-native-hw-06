@@ -12,36 +12,13 @@ import {
   Dimensions,
 } from "react-native";
 
+import { collection, query, onSnapshot } from "firebase/firestore";
+import { firestore } from "../firebase/config";
+
 import Message from "../assets/images/message.svg";
 import Like from "../assets/images/like.svg";
 import Location from "../assets/images/location.svg";
 
-const POSTS = [
-  {
-    id: 4,
-    postImage: require("../assets/images/forrest.jpg"),
-    title: "Forrest",
-    location: "Ukraine",
-    comments: 8,
-    likes: 153,
-  },
-  {
-    id: 5,
-    postImage: require("../assets/images/sunset.jpg"),
-    title: "Sunset on the Black Sea",
-    location: "Ukraine",
-    comments: 3,
-    likes: 200,
-  },
-  {
-    id: 6,
-    postImage: require("../assets/images/oldhouse.jpg"),
-    title: "Old house in Venice",
-    location: "Italy",
-    comments: 50,
-    likes: 200,
-  },
-];
 
 export const ProfileScreen = ({ navigation }) => {
   const [fontsLoaded] = useFonts({
@@ -57,7 +34,22 @@ export const ProfileScreen = ({ navigation }) => {
     Dimensions.get("window").height
   );
 
-  const [posts, setPosts] = useState(POSTS);
+  const [posts, setPosts] = useState([]);
+
+  const getAllPosts = async () => {
+    try {
+      const ref = query(collection(firestore, "posts"));
+      onSnapshot(ref, (snapshot) => {
+        setPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      });
+    } catch (error) {
+      console.log("error-message.get-posts", error.message);
+    }
+  };
+
+  useEffect(() => {
+    getAllPosts();
+  }, []);
 
   useEffect(() => {
     const onChange = () => {
@@ -98,6 +90,7 @@ export const ProfileScreen = ({ navigation }) => {
         source={require("../assets/images/imageBG.jpg")}
       >
         <FlatList
+        ListEmptyComponent={<View style={{ flex: 1, backgroundColor: "#FFFFFF", justifyContent: 'center', alignItems: 'center', padding: 16, height: 240, width: windowWidth }}><Text style={{...styles.textUserName, fontSize: 16}}>No posts yet</Text></View>}
           ListHeaderComponent={
             <View
               style={{
@@ -136,12 +129,12 @@ export const ProfileScreen = ({ navigation }) => {
             <View
               style={{
                 ...styles.cardContainer,
-                width: windowWidth,
+                 width: windowWidth,
                
               }}
             >
               <Image
-                source={item.postImage}
+                source={{uri: item.photo}}
                 style={{
                   ...styles.cardImage,
                   width: windowWidth - 16 * 2,
@@ -175,9 +168,9 @@ export const ProfileScreen = ({ navigation }) => {
                     <Text style={styles.cardText}>{item.likes}</Text>
                   </View>
                 </View>
-                <TouchableOpacity style={styles.cardWrapper} onPress={() => navigation.navigate('Map')}>
+                <TouchableOpacity style={styles.cardWrapper} onPress={() => navigation.navigate('Map', {location: item.location})}>
                   <Location />
-                  <Text style={styles.cardText}>{item.location}</Text>
+                  <Text style={styles.cardText}>{item.regionName[0].country}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -245,6 +238,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   cardImage: {
+    height: 240,
     resizeMode: "cover",
     borderRadius: 8,
   },

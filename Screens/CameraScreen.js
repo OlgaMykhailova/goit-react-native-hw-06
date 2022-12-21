@@ -17,6 +17,7 @@ import DownloadPhoto from "../assets/images/downloadPhoto.svg";
 
 export const CameraScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
+  const [regionName, setRegionName] = useState(null);
   const [photo, setPhoto] = useState();
 
   const cameraRef = useRef();
@@ -33,7 +34,12 @@ export const CameraScreen = ({ navigation }) => {
         }
 
         const location = await Location.getCurrentPositionAsync({});
+        const regionName = await Location.reverseGeocodeAsync({
+          latitude : location.coords.latitude,
+          longitude : location.coords.longitude
+      });
         setLocation(location.coords);
+        setRegionName(regionName);
       } catch (error) {
         console.log("error-message", error.message);
       }
@@ -85,7 +91,7 @@ export const CameraScreen = ({ navigation }) => {
       //   MediaLibrary.saveToLibraryAsync(photo.uri).then(() => {
       //     setPhoto(undefined);
       //   });
-      navigation.navigate("Create Post", { photo, location });
+      navigation.navigate("Create Post", { photo, location, regionName });
       setTimeout(() => {
         setPhoto(undefined);
         setLocation(null);

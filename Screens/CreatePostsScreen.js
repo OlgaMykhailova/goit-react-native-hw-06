@@ -43,18 +43,17 @@ export const CreatePostsScreen = ({ route, navigation }) => {
 
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
+  const [regionName, setRegionName] = useState("");
 
   const [isDisabledPublish, setIsDisabledPublish] = useState(true);
   const [isDisabledTrash, setIsDisabledTrash] = useState(true);
 
-  const {userId, login} = useSelector((state) => state.auth);
+  const { userId, login } = useSelector((state) => state.auth);
 
   const titleHandler = (title) => setTitle(title);
-  // const locationHandler = (location) => setLocation(location);
 
   const uploadPhotoToServer = async () => {
     try {
-      console.log(image)
       const response = await fetch(image);
       const file = await response.blob();
       const uniquePostId = uuid.v4();
@@ -64,7 +63,6 @@ export const CreatePostsScreen = ({ route, navigation }) => {
       await uploadBytes(storageRef, file);
 
       const photoRef = await getDownloadURL(storageRef);
-      console.log('photoRef', photoRef);
       return photoRef;
     } catch (error) {
       console.log("error-message.upoload-photo", error.message);
@@ -80,11 +78,12 @@ export const CreatePostsScreen = ({ route, navigation }) => {
         location,
         userId,
         login,
+        regionName,
       });
     } catch (error) {
-      console.log('error-message.upload-to-server', error.message)
+      console.log("error-message.upload-to-server", error.message);
     }
-  }
+  };
 
   const onPublish = () => {
     if (!title.trim() || !location) {
@@ -96,6 +95,7 @@ export const CreatePostsScreen = ({ route, navigation }) => {
     setImage();
     setTitle("");
     setLocation("");
+    setRegionName("");
     Keyboard.dismiss();
     navigation.navigate("Posts");
   };
@@ -111,6 +111,8 @@ export const CreatePostsScreen = ({ route, navigation }) => {
     if (route.params) {
       setImage(route.params.photo);
       setLocation(route.params.location);
+      setRegionName(route.params.regionName);
+      console.log(regionName)
     }
   }, [route.params]);
 
@@ -218,16 +220,11 @@ export const CreatePostsScreen = ({ route, navigation }) => {
                 }}
                 onFocus={() => setIsFocusedLocation(true)}
                 onBlur={() => setIsFocusedLocation(false)}
-                value={
-                  location
-                    ? `${location?.latitude}, ${location?.longitude}`
-                    : ""
-                }
+                value={regionName ? `${regionName[0].city}, ${regionName[0].country}` : ''}
                 textContentType={"location"}
                 placeholder="Location"
                 cursorColor={"#BDBDBD"}
                 placeholderTextColor={"#BDBDBD"}
-                // onChangeText={locationHandler}
               ></TextInput>
               <Location style={styles.locationIcon} />
             </View>

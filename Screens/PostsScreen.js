@@ -78,6 +78,7 @@ export const PostsScreen = ({ route, navigation }) => {
       style={{ backgroundColor: "#FFFFFF", alignItems: "center" }}
     >
       <FlatList
+      ListEmptyComponent={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16, height: 240, width: windowWidth - 16 * 2 }}><Text style={{...styles.textUserName, fontSize: 16}}>No posts yet</Text></View>}
         ListHeaderComponent={
           <View style={{ ...styles.userSection, width: windowWidth - 16 * 2 }}>
             <Image
@@ -135,10 +136,10 @@ export const PostsScreen = ({ route, navigation }) => {
               </View>
               <TouchableOpacity
                 style={styles.wrapper}
-                onPress={() => navigation.navigate("Map")}
+                onPress={() => navigation.navigate("Map", {location: item.location})}
               >
                 <Location />
-                <Text style={styles.cardText}>location</Text>
+                <Text style={styles.cardText}>{item.regionName[0].city}, {item.regionName[0].country}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -155,7 +156,7 @@ export const PostsScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   userSection: {
     marginVertical: 32,
-    flexDirec     tion: "row",
+    flexDirection: "row",
     alignItems: "center",
   },
   avatarImage: {

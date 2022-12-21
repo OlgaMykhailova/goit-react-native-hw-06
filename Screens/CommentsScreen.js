@@ -8,7 +8,7 @@ import {
   Text,
   Dimensions,
   FlatList,
- 
+  KeyboardAvoidingView,
   TouchableOpacity,
   Alert,
   Keyboard,
@@ -70,10 +70,10 @@ export const CommentsScreen = () => {
       Alert.alert(`Enter your comment, please`);
       return;
     }
+    Keyboard.dismiss();
     Alert.alert(`Your comment has been sent!`);
     console.log(comment);
     setComment("");
-    Keyboard.dismiss();
   };
 
   useEffect(() => {
@@ -103,65 +103,66 @@ export const CommentsScreen = () => {
   }
 
   return (
-    <View
-      onLayout={onLayout}
-      style={{ backgroundColor: "#FFFFFF", alignItems: "center" }}
-    >
-      <View style={{ width: windowWidth - 16 * 2 }}>
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <View style={{ ...styles.container, width: windowWidth - 16 * 2 }}>
-              <Image
-                style={styles.commentImage}
-                source={require("../assets/images/sunset.jpg")}
-              />
-            </View>
-          }
-          ListFooterComponent={
-            <View style={{ width: "100%", marginBottom: 32 }}>
-              <TextInput
-                value={comment}
-                style={styles.input}
-                placeholder="Leave a comment"
-                cursorColor={"#BDBDBD"}
-                placeholderTextColor={"#BDBDBD"}
-                onChangeText={commentHandler}
-              ></TextInput>
-              <TouchableOpacity style={styles.sendButton} onPress={onSend}>
-                <Send style={{ width: 34, height: 34 }} />
-              </TouchableOpacity>
-            </View>
-          }
-          contentContainerStyle={{ width: windowWidth - 16 * 2 }}
-          data={posts.commentsTexts}
-          renderItem={({ item }) => (
-            <View
-              style={{
-                ...styles.commentWrapper,
-                width: windowWidth - 16 * 2,
-              }}
-            >
-              <Image
-                source={item.userAvatar}
-                style={styles.commentAvatarImage}
-              />
+       <View onLayout={onLayout} style={{ backgroundColor: "#FFFFFF", alignItems: "center" }}>
+        <View style={{ width: windowWidth - 16 * 2 }}>
+          <FlatList
+            removeClippedSubviews={false}
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={
+              <View
+                style={{ ...styles.container, width: windowWidth - 16 * 2 }}
+              >
+                <Image
+                  style={styles.commentImage}
+                  source={require("../assets/images/sunset.jpg")}
+                />
+              </View>
+            }
+            ListFooterComponent={
+              <View style={{ width: "100%", marginBottom: 32 }}>
+                <TextInput
+                  value={comment}
+                  style={styles.input}
+                  placeholder="Leave a comment"
+                  cursorColor={"#BDBDBD"}
+                  placeholderTextColor={"#BDBDBD"}
+                  onChangeText={commentHandler}
+                ></TextInput>
+                <TouchableOpacity style={styles.sendButton} onPress={onSend}>
+                  <Send style={{ width: 34, height: 34 }} />
+                </TouchableOpacity>
+              </View>
+            }
+            contentContainerStyle={{ width: windowWidth - 16 * 2 }}
+            data={posts.commentsTexts}
+            renderItem={({ item }) => (
               <View
                 style={{
-                  ...styles.textWrapper,
-                  width: windowWidth - 28 - 16 * 3,
+                  ...styles.commentWrapper,
+                  width: windowWidth - 16 * 2,
                 }}
               >
-                <Text style={styles.commentText}>{item.text}</Text>
-                <Text style={styles.commentDate}>
-                  {item.date} | {item.time}
-                </Text>
+                <Image
+                  source={item.userAvatar}
+                  style={styles.commentAvatarImage}
+                />
+                <View
+                  style={{
+                    ...styles.textWrapper,
+                    width: windowWidth - 28 - 16 * 3,
+                  }}
+                >
+                  <Text style={styles.commentText}>{item.text}</Text>
+                  <Text style={styles.commentDate}>
+                    {item.date} | {item.time}
+                  </Text>
+                </View>
               </View>
-            </View>
-          )}
-        />
+            )}
+          />
+        </View>
       </View>
-    </View>
+    
   );
 };
 
