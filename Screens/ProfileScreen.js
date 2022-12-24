@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useSelector } from "react-redux";
+
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import {
@@ -12,13 +14,12 @@ import {
   Dimensions,
 } from "react-native";
 
-import { collection, query, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { firestore } from "../firebase/config";
 
 import Message from "../assets/images/message.svg";
 import Like from "../assets/images/like.svg";
 import Location from "../assets/images/location.svg";
-
 
 export const ProfileScreen = ({ navigation }) => {
   const [fontsLoaded] = useFonts({
@@ -34,13 +35,19 @@ export const ProfileScreen = ({ navigation }) => {
     Dimensions.get("window").height
   );
 
-  const [posts, setPosts] = useState([]);
+  const [userPosts, setUserPosts] = useState([]);
 
-  const getAllPosts = async () => {
+
+  const { login, userId, avatarImage } = useSelector((state) => state.auth);
+
+  const getUserPosts = async () => {
     try {
-      const ref = query(collection(firestore, "posts"));
+      const ref = query(
+        collection(firestore, "posts"),
+        where("userId", "==", `${userId}`)
+      );
       onSnapshot(ref, (snapshot) => {
-        setPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+        setUserPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
       });
     } catch (error) {
       console.log("error-message.get-posts", error.message);
@@ -48,7 +55,7 @@ export const ProfileScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    getAllPosts();
+    getUserPosts();
   }, []);
 
   useEffect(() => {
@@ -90,13 +97,30 @@ export const ProfileScreen = ({ navigation }) => {
         source={require("../assets/images/imageBG.jpg")}
       >
         <FlatList
-        ListEmptyComponent={<View style={{ flex: 1, backgroundColor: "#FFFFFF", justifyContent: 'center', alignItems: 'center', padding: 16, height: 240, width: windowWidth }}><Text style={{...styles.textUserName, fontSize: 16}}>No posts yet</Text></View>}
+          ListEmptyComponent={
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "#FFFFFF",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 16,
+                height: 240,
+                width: windowWidth,
+              }}
+            >
+              <Text style={{ ...styles.textUserName, fontSize: 16 }}>
+                No posts yet
+              </Text>
+            </View>
+          }
           ListHeaderComponent={
             <View
               style={{
                 ...styles.headerWrapper,
                 marginTop: windowWidth > 500 ? 100 : 147,
                 width: windowWidth,
+                
               }}
             >
               <View
@@ -107,7 +131,7 @@ export const ProfileScreen = ({ navigation }) => {
               >
                 <Image
                   style={styles.avatarImage}
-                  source={require("../assets/images/userAvatarLarge.jpg")}
+                  source={{uri: avatarImage}}
                 />
               </View>
               <View
@@ -119,22 +143,22 @@ export const ProfileScreen = ({ navigation }) => {
                 <Text
                   style={{ ...styles.userTitle, fontFamily: "RobotoMedium" }}
                 >
-                  Natali Romanova
+                  {login}
                 </Text>
               </View>
             </View>
           }
-          data={posts}
+          data={userPosts}
           renderItem={({ item }) => (
             <View
               style={{
                 ...styles.cardContainer,
-                 width: windowWidth,
+                width: windowWidth,
                
               }}
             >
               <Image
-                source={{uri: item.photo}}
+                source={{ uri: item.photo }}
                 style={{
                   ...styles.cardImage,
                   width: windowWidth - 16 * 2,
@@ -149,7 +173,9 @@ export const ProfileScreen = ({ navigation }) => {
               >
                 {item.title}
               </Text>
-              <View style={{...styles.cardThumb, width: windowWidth - 16 * 2}}>
+              <View
+                style={{ ...styles.cardThumb, width: windowWidth - 16 * 2 }}
+              >
                 <View
                   style={{
                     flexDirection: "row",
@@ -158,19 +184,26 @@ export const ProfileScreen = ({ navigation }) => {
                 >
                   <TouchableOpacity
                     style={styles.cardWrapper}
-                    onPress={() => navigation.navigate("Comments")}
+                    onPress={() => navigation.navigate("Comments", {postId: item.id, postPhoto: item.photo, commentsQuantity: item.commentsQuantity})}
                   >
                     <Message />
-                    <Text style={styles.cardText}>{item.comments}</Text>
+                    <Text style={styles.cardText}>{item.commentsQuantity}</Text>
                   </TouchableOpacity>
                   <View style={{ ...styles.cardWrapper, marginLeft: 24 }}>
                     <Like />
-                    <Text style={styles.cardText}>{item.likes}</Text>
+                    <Text style={styles.cardText}>{item.likesQuantity}</Text>
                   </View>
                 </View>
-                <TouchableOpacity style={styles.cardWrapper} onPress={() => navigation.navigate('Map', {location: item.location})}>
+                <TouchableOpacity
+                  style={styles.cardWrapper}
+                  onPress={() =>
+                    navigation.navigate("Map", { location: item.location })
+                  }
+                >
                   <Location />
-                  <Text style={styles.cardText}>{item.regionName[0].country}</Text>
+                  <Text style={styles.cardText}>
+                    {item.regionName[0].country}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -179,7 +212,6 @@ export const ProfileScreen = ({ navigation }) => {
           contentContainerStyle={{
             flexGrow: 1,
             alignItems: "center",
-
             borderTopLeftRadius: 25,
             borderTopRightRadius: 25,
           }}

@@ -13,12 +13,22 @@ import {
   Keyboard,
   ImageBackground,
   Dimensions,
+  Image,
 } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useDispatch } from "react-redux";
 
+import * as ImagePicker from "expo-image-picker";
+
+import uuid from "react-native-uuid";
+
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc } from "firebase/firestore";
+import { firestore } from "../firebase/config";
+
 import Add from "../assets/images/add.svg";
+import Delete from "../assets/images/delete.svg";
 
 import { authSignUpUser } from "../redux/auth/authOperations";
 
@@ -28,6 +38,8 @@ export const RegistrationScreen = ({ navigation }) => {
     RobotoMedium: require("../assets/fonts/Roboto-Medium.ttf"),
     RobotoBold: require("../assets/fonts/Roboto-Bold.ttf"),
   });
+
+  const [pickedImagePath, setPickedImagePath] = useState("");
 
   const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
@@ -48,6 +60,28 @@ export const RegistrationScreen = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
+  const downloadAvatar = async () => {
+    try {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (permissionResult.granted === false) {
+        alert("You've refused to allow this appp to access your photos!");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync();
+
+      if (!result.canceled) {
+        setPickedImagePath(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.log("error-message", error.message);
+    }
+  };
+
+  deleteAvatar = () => setPickedImagePath("");
+
   useEffect(() => {
     const onChange = () => {
       const width = Dimensions.get("window").width;
@@ -64,22 +98,46 @@ export const RegistrationScreen = ({ navigation }) => {
   const emailHandler = (email) => setEmail(email);
   const passwordHandler = (password) => setPassword(password);
 
-  const onSignup = () => {
-    if (!login.trim() || !email.trim() || !password.trim()) {
-      Alert.alert(`All fields must be completed!`);
-      return;
+  const uploadPhotoToServer = async () => {
+    try {
+      const response = await fetch(pickedImagePath);
+      const file = await response.blob();
+      const uniquePostId = uuid.v4();
+      const storage = getStorage();
+      const storageRef = ref(storage, `avatarImage/${uniquePostId}`);
+
+      await uploadBytes(storageRef, file);
+
+      const photoRef = await getDownloadURL(storageRef);
+      return photoRef;
+    } catch (error) {
+      console.log("error-message.upoload-photo", error.message);
     }
-    Alert.alert(`Welcome ${login}, your registration is successfull!`);
-    const newUser = {
-      login,
-      email,
-      password,
+  };
+
+  const onSignup = async () => {
+    try {
+      if (!login.trim() || !email.trim() || !password.trim()) {
+        Alert.alert(`All fields must be completed!`);
+        return;
+      }
+      Alert.alert(`Welcome ${login}, your registration is successfull!`);
+      const imageRef = await uploadPhotoToServer();
+      const newUser = {
+        avatarImage: imageRef,
+        login,
+        email,
+        password,
+      };
+      dispatch(authSignUpUser(newUser));
+      setLogin("");
+      setEmail("");
+      setPassword("");
+      setPickedImagePath("");
+      Keyboard.dismiss();
+    } catch (error) {
+      console.log("error-message", error.message);
     }
-    dispatch(authSignUpUser(newUser));
-    setLogin("");
-    setEmail("");
-    setPassword("");
-    Keyboard.dismiss();
   };
 
   const keyboardHide = () => {
@@ -128,20 +186,48 @@ export const RegistrationScreen = ({ navigation }) => {
                   marginTop: windowWidth > 500 ? 100 : 263,
                 }}
               >
-                <View
-                  style={{
-                    ...styles.imageThumb,
-                    left: (windowWidth - 120) / 2,
-                  }}
-                ></View>
-                <TouchableOpacity
-                  style={{
-                    ...styles.addButton,
-                    left: windowWidth / 2 + 47.5,
-                  }}
-                >
-                  <Add />
-                </TouchableOpacity>
+                {pickedImagePath ? (
+                  <>
+                    <View
+                      style={{
+                        ...styles.imageThumb,
+                        left: (windowWidth - 120) / 2,
+                      }}
+                    >
+                      <Image
+                        style={styles.avatarImage}
+                        source={{ uri: pickedImagePath }}
+                      />
+                    </View>
+                    <TouchableOpacity
+                      onPress={deleteAvatar}
+                      style={{
+                        ...styles.addButton,
+                        left: windowWidth / 2 + 47.5,
+                      }}
+                    >
+                      <Delete />
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <View
+                      style={{
+                        ...styles.imageThumb,
+                        left: (windowWidth - 120) / 2,
+                      }}
+                    ></View>
+                    <TouchableOpacity
+                      onPress={downloadAvatar}
+                      style={{
+                        ...styles.addButton,
+                        left: windowWidth / 2 + 47.5,
+                      }}
+                    >
+                      <Add />
+                    </TouchableOpacity>
+                  </>
+                )}
                 <View style={{ width: windowWidth - 16 * 2 }}>
                   <Text style={{ ...styles.title, fontFamily: "RobotoMedium" }}>
                     Registration
@@ -255,6 +341,12 @@ const styles = StyleSheet.create({
     height: 120,
     backgroundColor: "#F6F6F6",
     borderRadius: 16,
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+    resizeMode: "cover",
   },
   addButton: {
     position: "absolute",

@@ -10,8 +10,8 @@ import {
   View,
   TouchableOpacity,
   Alert,
+  
 } from "react-native";
-
 
 import DownloadPhoto from "../assets/images/downloadPhoto.svg";
 
@@ -23,7 +23,6 @@ export const CameraScreen = ({ navigation }) => {
   const cameraRef = useRef();
   const [hasCameraPermission, setHasCameraPermission] = useState();
   const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState();
-  
 
   useEffect(() => {
     (async () => {
@@ -35,9 +34,9 @@ export const CameraScreen = ({ navigation }) => {
 
         const location = await Location.getCurrentPositionAsync({});
         const regionName = await Location.reverseGeocodeAsync({
-          latitude : location.coords.latitude,
-          longitude : location.coords.longitude
-      });
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
         setLocation(location.coords);
         setRegionName(regionName);
       } catch (error) {

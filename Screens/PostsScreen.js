@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useSelector } from "react-redux";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import {
@@ -11,7 +12,13 @@ import {
   FlatList,
 } from "react-native";
 
-import { collection, query, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  query,
+  doc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 import { firestore } from "../firebase/config";
 
 import Message from "../assets/images/message.svg";
@@ -29,7 +36,18 @@ export const PostsScreen = ({ route, navigation }) => {
     Dimensions.get("window").width
   );
 
+  const { login, email, avatarImage } = useSelector((state) => state.auth);
+
   const [posts, setPosts] = useState([]);
+
+  const addLike = async (postId, likesQuantity) => {
+    try {
+      const postDocRef = doc(firestore, "posts", postId);
+      await updateDoc(postDocRef, { likesQuantity: likesQuantity + 1 });
+    } catch (error) {
+      console.log("error-message.add-like", error.message);
+    }
+  };
 
   const getAllPosts = async () => {
     try {
@@ -78,21 +96,33 @@ export const PostsScreen = ({ route, navigation }) => {
       style={{ backgroundColor: "#FFFFFF", alignItems: "center" }}
     >
       <FlatList
-      ListEmptyComponent={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16, height: 240, width: windowWidth - 16 * 2 }}><Text style={{...styles.textUserName, fontSize: 16}}>No posts yet</Text></View>}
+        ListEmptyComponent={
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 16,
+              height: 240,
+              width: windowWidth - 16 * 2,
+            }}
+          >
+            <Text style={{ ...styles.textUserName, fontSize: 16 }}>
+              No posts yet
+            </Text>
+          </View>
+        }
         ListHeaderComponent={
           <View style={{ ...styles.userSection, width: windowWidth - 16 * 2 }}>
-            <Image
-              style={styles.avatarImage}
-              source={require("../assets/images/userAvatar.jpg")}
-            />
+            <Image style={styles.avatarImage} source={{ uri: avatarImage }} />
             <View style={styles.userInfo}>
               <Text
                 style={{ ...styles.textUserName, fontFamily: "RobotoBold" }}
               >
-                Natali Romanova
+                {login}
               </Text>
               <Text style={{ ...styles.textUserEmail, fontFamily: "Roboto" }}>
-                email@example.com
+                {email}
               </Text>
             </View>
           </View>
@@ -124,22 +154,36 @@ export const PostsScreen = ({ route, navigation }) => {
               >
                 <TouchableOpacity
                   style={styles.wrapper}
-                  onPress={() => navigation.navigate("Comments")}
+                  onPress={() =>
+                    navigation.navigate("Comments", {
+                      postId: item.id,
+                      postPhoto: item.photo,
+                      commentsQuantity: item.commentsQuantity,
+                    })
+                  }
                 >
                   <Message />
-                  <Text style={styles.cardText}>{item.comments}</Text>
+                  <Text style={styles.cardText}>{item.commentsQuantity}</Text>
                 </TouchableOpacity>
-                <View style={{ ...styles.wrapper, marginLeft: 24 }}>
-                  <Like />
-                  <Text style={styles.cardText}>{item.likes}</Text>
-                </View>
+                <TouchableOpacity
+                  onPress={() => addLike(item.id, item.likesQuantity)}
+                >
+                  <View style={{ ...styles.wrapper, marginLeft: 24 }}>
+                    <Like />
+                    <Text style={styles.cardText}>{item.likesQuantity}</Text>
+                  </View>
+                </TouchableOpacity>
               </View>
               <TouchableOpacity
                 style={styles.wrapper}
-                onPress={() => navigation.navigate("Map", {location: item.location})}
+                onPress={() =>
+                  navigation.navigate("Map", { location: item.location })
+                }
               >
                 <Location />
-                <Text style={styles.cardText}>{item.regionName[0].city}, {item.regionName[0].country}</Text>
+                <Text style={styles.cardText}>
+                  {item.regionName[0].city}, {item.regionName[0].country}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

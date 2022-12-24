@@ -8,47 +8,26 @@ import {
   Text,
   Dimensions,
   FlatList,
-  KeyboardAvoidingView,
   TouchableOpacity,
   Alert,
   Keyboard,
+  TextInput,
 } from "react-native";
+
+import { useSelector } from "react-redux";
+
+import {
+  collection,
+  doc,
+  addDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
+import { firestore } from "../firebase/config";
+
 import Send from "../assets/images/send.svg";
-import { TextInput } from "react-native-gesture-handler";
 
-const POSTS = {
-  id: 2,
-  postImage: require("../assets/images/sunset.jpg"),
-  title: "Sunset on the Black Sea",
-  location: "Ukraine",
-  comments: 3,
-  commentsTexts: [
-    {
-      id: 100,
-      date: "09 June, 2020",
-      time: "08:40",
-      userAvatar: require("../assets/images/avatarSmall.jpg"),
-      text: "Really love your most recent photo. I’ve been trying to capture the same thing for a few months and would love some tips!",
-    },
-    {
-      id: 101,
-      userAvatar: require("../assets/images/avatar2Small.jpg"),
-      date: "09 June, 2020",
-      time: "09:14",
-      text: "A fast 50mm like f1.8 would help with the bokeh. I’ve been using primes as they tend to get a bit sharper images.",
-    },
-    {
-      id: 102,
-      date: "09 June, 2020",
-      time: "09:20",
-      userAvatar: require("../assets/images/avatarSmall.jpg"),
-      text: "Thank you! That was very helpful!",
-    },
-  ],
-  likes: 200,
-};
-
-export const CommentsScreen = () => {
+export const CommentsScreen = ({ route }) => {
   const [fontsLoaded] = useFonts({
     Roboto: require("../assets/fonts/Roboto-Regular.ttf"),
     RobotoMedium: require("../assets/fonts/Roboto-Medium.ttf"),
@@ -59,22 +38,59 @@ export const CommentsScreen = () => {
     Dimensions.get("window").width
   );
 
-  const [posts, setPosts] = useState(POSTS);
+  const [allComments, setAllComments] = useState([]);
 
   const [comment, setComment] = useState("");
 
   const commentHandler = (comment) => setComment(comment);
 
-  const onSend = () => {
+  const { postId, postPhoto, commentsQuantity } = route.params;
+
+  const { login, avatarImage } = useSelector((state) => state.auth);
+
+  const uploadCommentToServer = async () => {
+    const date = new Date().toLocaleDateString();
+    const time = new Date().toLocaleTimeString();
+    try {
+      const postDocRef = await doc(firestore, "posts", postId);
+      await addDoc(collection(postDocRef, "comments"), {
+        comment,
+        login,
+        date,
+        time,
+        postPhoto,
+      });
+      await updateDoc(postDocRef, { commentsQuantity: commentsQuantity + 1 });
+    } catch (error) {
+      console.log("error-message.upoload-comment", error.message);
+    }
+  };
+
+  const onSendComment = () => {
     if (!comment.trim()) {
       Alert.alert(`Enter your comment, please`);
       return;
     }
+    uploadCommentToServer();
     Keyboard.dismiss();
     Alert.alert(`Your comment has been sent!`);
-    console.log(comment);
     setComment("");
   };
+
+  const getAllComments = async () => {
+    try {
+      const postDocRef = await doc(firestore, "posts", postId);
+      onSnapshot(collection(postDocRef, "comments"), (snapshot) => {
+        setAllComments(snapshot.docs.map((doc) => ({ ...doc.data() })));
+      });
+    } catch (error) {
+      console.log("error-message.get-comments", error.message);
+    }
+  };
+
+  useEffect(() => {
+    getAllComments();
+  }, []);
 
   useEffect(() => {
     const onChange = () => {
@@ -103,66 +119,67 @@ export const CommentsScreen = () => {
   }
 
   return (
-       <View onLayout={onLayout} style={{ backgroundColor: "#FFFFFF", alignItems: "center" }}>
-        <View style={{ width: windowWidth - 16 * 2 }}>
-          <FlatList
-            removeClippedSubviews={false}
-            showsVerticalScrollIndicator={false}
-            ListHeaderComponent={
-              <View
-                style={{ ...styles.container, width: windowWidth - 16 * 2 }}
+    <View
+      onLayout={onLayout}
+      style={{ backgroundColor: "#FFFFFF", alignItems: "center" }}
+    >
+      <View style={{ width: windowWidth - 16 * 2 }}>
+        <FlatList
+          removeClippedSubviews={false}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <View style={{ ...styles.container, width: windowWidth - 16 * 2 }}>
+              <Image style={styles.commentImage} source={{ uri: postPhoto }} />
+            </View>
+          }
+          ListFooterComponent={
+            <View style={{ width: "100%", marginBottom: 32 }}>
+              <TextInput
+                value={comment}
+                style={styles.input}
+                placeholder="Leave a comment"
+                cursorColor={"#BDBDBD"}
+                placeholderTextColor={"#BDBDBD"}
+                onChangeText={commentHandler}
+              ></TextInput>
+              <TouchableOpacity
+                style={styles.sendButton}
+                onPress={onSendComment}
               >
-                <Image
-                  style={styles.commentImage}
-                  source={require("../assets/images/sunset.jpg")}
-                />
-              </View>
-            }
-            ListFooterComponent={
-              <View style={{ width: "100%", marginBottom: 32 }}>
-                <TextInput
-                  value={comment}
-                  style={styles.input}
-                  placeholder="Leave a comment"
-                  cursorColor={"#BDBDBD"}
-                  placeholderTextColor={"#BDBDBD"}
-                  onChangeText={commentHandler}
-                ></TextInput>
-                <TouchableOpacity style={styles.sendButton} onPress={onSend}>
-                  <Send style={{ width: 34, height: 34 }} />
-                </TouchableOpacity>
-              </View>
-            }
-            contentContainerStyle={{ width: windowWidth - 16 * 2 }}
-            data={posts.commentsTexts}
-            renderItem={({ item }) => (
+                <Send style={{ width: 34, height: 34 }} />
+              </TouchableOpacity>
+            </View>
+          }
+          contentContainerStyle={{ width: windowWidth - 16 * 2 }}
+          data={allComments}
+          renderItem={({ item }) => (
+            <View
+              style={{
+                ...styles.commentWrapper,
+                width: windowWidth - 16 * 2,
+              }}
+            >
+              <Image
+                source={{ uri: avatarImage }}
+                style={styles.commentAvatarImage}
+              />
               <View
                 style={{
-                  ...styles.commentWrapper,
-                  width: windowWidth - 16 * 2,
+                  ...styles.textWrapper,
+                  width: windowWidth - 28 - 16 * 3,
                 }}
               >
-                <Image
-                  source={item.userAvatar}
-                  style={styles.commentAvatarImage}
-                />
-                <View
-                  style={{
-                    ...styles.textWrapper,
-                    width: windowWidth - 28 - 16 * 3,
-                  }}
-                >
-                  <Text style={styles.commentText}>{item.text}</Text>
-                  <Text style={styles.commentDate}>
-                    {item.date} | {item.time}
-                  </Text>
-                </View>
+                <Text style={styles.commentText}>{item.comment}</Text>
+                <Text style={styles.commentDate}>
+                  {item.date} | {item.time}
+                </Text>
               </View>
-            )}
-          />
-        </View>
+            </View>
+          )}
+          keyExtractor={(item, index) => index.toString()}
+        />
       </View>
-    
+    </View>
   );
 };
 
@@ -175,6 +192,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   commentImage: {
+    height: 240,
     width: "100%",
     marginBottom: 31,
     borderRadius: 8,
@@ -195,6 +213,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     marginRight: 16,
+    borderRadius: 16,
     resizeMode: "cover",
   },
   commentText: {

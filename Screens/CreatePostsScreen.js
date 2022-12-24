@@ -79,6 +79,8 @@ export const CreatePostsScreen = ({ route, navigation }) => {
         userId,
         login,
         regionName,
+        commentsQuantity: 0,
+        likesQuantity: 0,
       });
     } catch (error) {
       console.log("error-message.upload-to-server", error.message);
