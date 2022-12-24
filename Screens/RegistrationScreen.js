@@ -24,8 +24,6 @@ import * as ImagePicker from "expo-image-picker";
 import uuid from "react-native-uuid";
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, addDoc } from "firebase/firestore";
-import { firestore } from "../firebase/config";
 
 import Add from "../assets/images/add.svg";
 import Delete from "../assets/images/delete.svg";
