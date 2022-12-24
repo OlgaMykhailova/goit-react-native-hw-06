@@ -78,7 +78,7 @@ export const RegistrationScreen = ({ navigation }) => {
     }
   };
 
-  deleteAvatar = () => setPickedImagePath("");
+  const deleteAvatar = () => setPickedImagePath("");
 
   useEffect(() => {
     const onChange = () => {
