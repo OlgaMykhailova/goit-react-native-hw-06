@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -17,9 +17,12 @@ import {
 import { collection, query, onSnapshot, where } from "firebase/firestore";
 import { firestore } from "../firebase/config";
 
+import { authSignOutUser } from "../redux/auth/authOperations";
+
 import Message from "../assets/images/message.svg";
 import Like from "../assets/images/like.svg";
 import Location from "../assets/images/location.svg";
+import Logout from "../assets/images/logout.svg";
 
 export const ProfileScreen = ({ navigation }) => {
   const [fontsLoaded] = useFonts({
@@ -37,8 +40,9 @@ export const ProfileScreen = ({ navigation }) => {
 
   const [userPosts, setUserPosts] = useState([]);
 
-
   const { login, userId, avatarImage } = useSelector((state) => state.auth);
+
+  const dispatch = useDispatch();
 
   const getUserPosts = async () => {
     try {
@@ -47,7 +51,9 @@ export const ProfileScreen = ({ navigation }) => {
         where("userId", "==", `${userId}`)
       );
       onSnapshot(ref, (snapshot) => {
-        setUserPosts(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+        setUserPosts(
+          snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+        );
       });
     } catch (error) {
       console.log("error-message.get-posts", error.message);
@@ -120,7 +126,6 @@ export const ProfileScreen = ({ navigation }) => {
                 ...styles.headerWrapper,
                 marginTop: windowWidth > 500 ? 100 : 147,
                 width: windowWidth,
-                
               }}
             >
               <View
@@ -131,9 +136,15 @@ export const ProfileScreen = ({ navigation }) => {
               >
                 <Image
                   style={styles.avatarImage}
-                  source={{uri: avatarImage}}
+                  source={{ uri: avatarImage }}
                 />
               </View>
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={() => dispatch(authSignOutUser())}
+              >
+                <Logout />
+              </TouchableOpacity>
               <View
                 style={{
                   ...styles.userTitleWrapper,
@@ -154,7 +165,6 @@ export const ProfileScreen = ({ navigation }) => {
               style={{
                 ...styles.cardContainer,
                 width: windowWidth,
-               
               }}
             >
               <Image
@@ -184,7 +194,13 @@ export const ProfileScreen = ({ navigation }) => {
                 >
                   <TouchableOpacity
                     style={styles.cardWrapper}
-                    onPress={() => navigation.navigate("Comments", {postId: item.id, postPhoto: item.photo, commentsQuantity: item.commentsQuantity})}
+                    onPress={() =>
+                      navigation.navigate("Comments", {
+                        postId: item.id,
+                        postPhoto: item.photo,
+                        commentsQuantity: item.commentsQuantity,
+                      })
+                    }
                   >
                     <Message />
                     <Text style={styles.cardText}>{item.commentsQuantity}</Text>
@@ -247,6 +263,11 @@ const styles = StyleSheet.create({
     height: 120,
     backgroundColor: "#F6F6F6",
     borderRadius: 16,
+  },
+  logoutButton: {
+    position: "absolute",
+    top: 22,
+    right: 16,
   },
   avatarImage: {
     width: "100%",

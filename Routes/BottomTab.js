@@ -130,6 +130,7 @@ export const BottomTabMenu = ({ navigation }) => {
               />
             </View>
           ),
+
         }}
       />
     </BottomTab.Navigator>

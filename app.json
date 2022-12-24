@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "goit-react-native-hw-06",
-    "slug": "goit-react-native-hw-06",
+    "slug": "social-network",
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -28,6 +28,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "92ccd89c-3f72-4b53-8f46-da89650f413d"
+      }
+    },
+    "owner": "olgamykhailova"
   }
 }

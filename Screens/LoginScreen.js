@@ -119,7 +119,7 @@ export const LoginScreen = ({navigation}) => {
                 style={{
                   ...styles.wrapper,
                   width: windowWidth,
-                  marginTop: windowWidth > 500 ? 100 : 263,
+                  marginTop: windowWidth > 500 ? 100 : 293,
                 }}
               >
 
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   },
   link: {
     marginTop: 16,
-    marginBottom: 60,
+    marginBottom: 100,
     textAlign: "center",
     color: "#1B4371",
   },
