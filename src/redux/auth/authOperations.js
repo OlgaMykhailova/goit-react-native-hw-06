@@ -6,6 +6,8 @@ import {
   signOut,
 } from "firebase/auth";
 
+import { Alert } from "react-native";
+
 import { auth } from "../../firebase/config";
 
 import { authSlice } from "./authSlice";
@@ -22,8 +24,6 @@ export const authSignUpUser =
         displayName: login,
         photoURL: avatarImage,
       });
-
-      console.log(auth.currentUser);
 
       const { uid, displayName, photoURL } = auth.currentUser;
 
@@ -45,7 +45,7 @@ export const authSignInUser =
     try {
       const user = await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
-      console.log("error.message.sign-in:", error.message);
+      Alert.alert("Error! Email or password doesn't match!")
     }
   };
 export const authSignOutUser = () => async (dispatch, getState) => {
