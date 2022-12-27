@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   showPassword: {
     position: "absolute",
     right: 0,
-    bottom: 205,
+    bottom: 245,
     paddingRight: 16,
   },
   textShowPassword: {

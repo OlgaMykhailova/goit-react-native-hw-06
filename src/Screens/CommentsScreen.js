@@ -58,7 +58,7 @@ export const CommentsScreen = ({ route }) => {
         login,
         date,
         time,
-        postPhoto,
+        commentAvatar: avatarImage,
       });
       await updateDoc(postDocRef, { commentsQuantity: commentsQuantity + 1 });
     } catch (error) {
@@ -160,7 +160,7 @@ export const CommentsScreen = ({ route }) => {
               }}
             >
               <Image
-                source={{ uri: avatarImage }}
+                source={{ uri: item.commentAvatar }}
                 style={styles.commentAvatarImage}
               />
               <View

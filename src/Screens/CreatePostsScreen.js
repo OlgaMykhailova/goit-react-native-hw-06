@@ -81,6 +81,7 @@ export const CreatePostsScreen = ({ route, navigation }) => {
         regionName,
         commentsQuantity: 0,
         likesQuantity: 0,
+        likeStatus: false,
       });
     } catch (error) {
       console.log("error-message.upload-to-server", error.message);

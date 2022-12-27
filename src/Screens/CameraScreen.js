@@ -10,7 +10,6 @@ import {
   View,
   TouchableOpacity,
   Alert,
-  
 } from "react-native";
 
 import DownloadPhoto from "../assets/images/downloadPhoto.svg";
@@ -147,6 +146,7 @@ export const CameraScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   camera: {
     flex: 1,
+    height: "100%",
     alignItems: "center",
     justifyContent: "flex-end",
   },

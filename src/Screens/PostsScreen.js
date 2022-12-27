@@ -43,7 +43,22 @@ export const PostsScreen = ({ route, navigation }) => {
   const addLike = async (postId, likesQuantity) => {
     try {
       const postDocRef = doc(firestore, "posts", postId);
-      await updateDoc(postDocRef, { likesQuantity: likesQuantity + 1 });
+      await updateDoc(postDocRef, {
+        likesQuantity: likesQuantity + 1,
+        likeStatus: true,
+      });
+    } catch (error) {
+      console.log("error-message.add-like", error.message);
+    }
+  };
+
+  const removeLike = async (postId, likesQuantity) => {
+    try {
+      const postDocRef = doc(firestore, "posts", postId);
+      await updateDoc(postDocRef, {
+        likesQuantity: likesQuantity - 1,
+        likeStatus: false,
+      });
     } catch (error) {
       console.log("error-message.add-like", error.message);
     }
@@ -162,14 +177,18 @@ export const PostsScreen = ({ route, navigation }) => {
                     })
                   }
                 >
-                  <Message />
+                  <Message
+                    fill={item.commentsQuantity === 0 ? "#BDBDBD" : "#FF6C00"}
+                  />
                   <Text style={styles.cardText}>{item.commentsQuantity}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => addLike(item.id, item.likesQuantity)}
+                  onPress={ item.likeStatus ? () => removeLike(item.id, item.likesQuantity, item.likeStatus) : () => addLike(item.id, item.likesQuantity, item.likeStatus)}
                 >
                   <View style={{ ...styles.wrapper, marginLeft: 24 }}>
-                    <Like />
+                    <Like
+                      fill={item.likesQuantity === 0 ? "#BDBDBD" : "#FF6C00"}
+                    />
                     <Text style={styles.cardText}>{item.likesQuantity}</Text>
                   </View>
                 </TouchableOpacity>
