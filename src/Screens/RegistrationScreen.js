@@ -120,7 +120,7 @@ export const RegistrationScreen = ({ navigation }) => {
 
   const onSignup = async () => {
     try {
-      if (!login.trim() || !email.trim() || !password.trim()) {
+      if (!login.trim() || !email.trim() || !password.trim() || !pickedImagePath.trim()) {
         Alert.alert(`All fields must be completed!`);
         return;
       }
