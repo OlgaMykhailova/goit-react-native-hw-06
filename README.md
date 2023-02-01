@@ -3,6 +3,8 @@
 
 [Live Demo Photo Application](https://youtu.be/Wri-7jYoA0Q)
 
+![Registration page](./src/assets/registration-page.jpg)
+
 
 ## Deploy
 
