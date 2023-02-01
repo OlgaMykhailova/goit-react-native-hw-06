@@ -1,6 +1,9 @@
 # react-native-photo-app
 
 
-https://youtu.be/Wri-7jYoA0Q
+[Live Demo Photo Application](https://youtu.be/Wri-7jYoA0Q)
 
-https://expo.dev/@olgamykhailova/social-network?serviceType=classic
+
+## Deploy
+
+[Link for Expo Go](https://expo.dev/@olgamykhailova/social-network?serviceType=classic)
