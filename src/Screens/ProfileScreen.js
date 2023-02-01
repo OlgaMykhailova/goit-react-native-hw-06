@@ -202,11 +202,11 @@ export const ProfileScreen = ({ navigation }) => {
                       })
                     }
                   >
-                    <Message />
+                    <Message fill={item.commentsQuantity === 0 ? "#BDBDBD" : "#FF6C00"}/>
                     <Text style={styles.cardText}>{item.commentsQuantity}</Text>
                   </TouchableOpacity>
                   <View style={{ ...styles.cardWrapper, marginLeft: 24 }}>
-                    <Like />
+                    <Like fill={item.likesQuantity === 0 ? "#BDBDBD" : "#FF6C00"} />
                     <Text style={styles.cardText}>{item.likesQuantity}</Text>
                   </View>
                 </View>

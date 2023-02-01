@@ -36,7 +36,7 @@ export const authSignUpUser =
         })
       );
     } catch (error) {
-      console.log("error.message.sign-up:", error.message);
+      Alert.alert(error.message);
     }
   };
 export const authSignInUser =
@@ -53,7 +53,7 @@ export const authSignOutUser = () => async (dispatch, getState) => {
     await signOut(auth);
     dispatch(authSignOut());
   } catch (error) {
-    console.log("error.message.sign-out:", error.message);
+    Alert.alert(error.message);
   }
 };
 
@@ -72,7 +72,7 @@ export const authStateChangeUser = () => async (dispatch) => {
         dispatch(authStateChange({ stateChange: true }));
       }
     } catch (error) {
-      console.log("error.message.state-change:", error.message);
+      Alert.alert(error.message);
     }
   });
 };

@@ -124,7 +124,7 @@ export const RegistrationScreen = ({ navigation }) => {
         Alert.alert(`All fields must be completed!`);
         return;
       }
-      Alert.alert(`Welcome ${login}, your registration is successfull!`);
+      
       const imageRef = await uploadPhotoToServer();
       const newUser = {
         avatarImage: imageRef,
@@ -139,7 +139,7 @@ export const RegistrationScreen = ({ navigation }) => {
       setPickedImagePath("");
       Keyboard.dismiss();
     } catch (error) {
-      console.log("error-message", error.message);
+      Alert.alert(error.message);
     }
   };
 
