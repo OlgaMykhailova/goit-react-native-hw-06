@@ -3,6 +3,10 @@
 
 [Live Demo Photo Application -Yotube](https://youtu.be/Wri-7jYoA0Q)
 
+## Deploy
+
+[Link for Expo Go](https://expo.dev/@olgamykhailova/social-network?serviceType=classic)
+
 ![Registration page](./src/assets/registration-page.jpg)
 ![Login page](./src/assets/login-page.jpg)
 ![Create post](./src/assets/create-post.jpg)
@@ -10,6 +14,4 @@
 ![Comments](./src/assets/comments.jpg)
 
 
-## Deploy
 
-[Link for Expo Go](https://expo.dev/@olgamykhailova/social-network?serviceType=classic)
