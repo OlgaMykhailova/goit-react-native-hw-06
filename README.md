@@ -1,7 +1,7 @@
 # react-native-photo-app
 
 
-[Live Demo Photo Application](https://youtu.be/Wri-7jYoA0Q)
+[Live Demo Photo Application -Yotube](https://youtu.be/Wri-7jYoA0Q)
 
 ![Registration page](./src/assets/registration-page.jpg)
 ![Login page](./src/assets/login-page.jpg)
