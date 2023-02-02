@@ -23,9 +23,6 @@ npm install
 npm start
 ```
 
+## Main Technologies
 
-
-
-
-
-
+React Native, Expo Go, Redux, Firebase Cloud Firestore
