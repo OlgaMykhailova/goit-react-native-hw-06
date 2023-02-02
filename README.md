@@ -16,6 +16,15 @@ Photo App is a small social network where you can register, take photos by the p
 
 [Link for Expo Go](https://expo.dev/@olgamykhailova/social-network?serviceType=classic)
 
+## Project setup
+
+```
+npm start
+
+```
+
+
+
 
 
 
