@@ -18,7 +18,8 @@ Photo App is a small social network where you can register, take photos by the p
 
 ## Project setup
 
-```npm start
+```
+npm start
 ```
 
 
