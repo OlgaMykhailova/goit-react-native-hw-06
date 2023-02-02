@@ -1,5 +1,9 @@
 # React Native Photo App
 
+## Main Technologies
+
+React Native, Expo Go, Redux, Firebase Cloud Firestore
+
 ## Description
 
 [Live Demo Photo Application - Yotube](https://youtu.be/Wri-7jYoA0Q)
@@ -23,6 +27,3 @@ npm install
 npm start
 ```
 
-## Main Technologies
-
-React Native, Expo Go, Redux, Firebase Cloud Firestore
